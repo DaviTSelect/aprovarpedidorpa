@@ -37,7 +37,7 @@ pyinstaller ^
   --onefile ^
   --windowed ^
   --icon=logo.ico ^
-  --name=aprovar_pedidos ^
+  --name=AprovarPedidosPF ^
   --add-data="logo.ico;." ^
   --add-data="conveniar.py;." ^
   --add-data="version.py;." ^
@@ -66,7 +66,7 @@ if errorlevel 1 (
 echo.
 echo ==============================================
 echo   Concluido!
-echo   Arquivo: dist\aprovar_pedidos.exe
+echo   Arquivo: dist\AprovarPedidosPF.exe
 echo ==============================================
 echo.
 echo Antes de distribuir:

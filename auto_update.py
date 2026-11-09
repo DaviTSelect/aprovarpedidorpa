@@ -20,7 +20,7 @@ from pathlib import Path
 # Exemplo: REPO_GITHUB = "minhaempresa/aprovar-pedidos-rpa"
 REPO_GITHUB: str = "DaviTSelect/aprovarpedidorpa"
 
-NOME_EXE: str = "aprovar_pedidos.exe"
+NOME_EXE: str = "AprovarPedidosPF.exe"
 
 # Cores de status (usadas pela UI tkinter)
 COR_OK      = "#53b88c"   # verde — atualizado

@@ -1031,7 +1031,7 @@ DIVIDER    = "#415364"
 # Janela raiz
 # ---------------------------------------------------------------------------
 janela = tk.Tk()
-janela.title(f"Aprovação de Pedidos  v{__version__}")
+janela.title(f"Aprovação de Pedidos de Pagamento PF — RPA  v{__version__}")
 janela.geometry("1020x750")
 janela.minsize(820, 580)
 janela.configure(bg=BG)
@@ -1049,9 +1049,9 @@ frame_cabecalho.pack(fill="x", padx=48, pady=(22, 0))
 
 cab_esq = tk.Frame(frame_cabecalho, bg=BG)
 cab_esq.pack(side="left", fill="y")
-tk.Label(cab_esq, text="A U T O M A Ç Ã O   O P E R A C I O N A L",
+tk.Label(cab_esq, text="R P A   —   P A G A M E N T O   P E S S O A   F Í S I C A",
          font=("Segoe UI", 8, "bold"), bg=BG, fg="#85929c").pack(anchor="w")
-tk.Label(cab_esq, text="Aprovar Pedidos",
+tk.Label(cab_esq, text="Aprovar Pedidos de Pagamento PF",
          font=("Segoe UI", 15, "bold"), bg=BG, fg=TEXT).pack(anchor="w", pady=(4, 0))
 
 cab_dir = tk.Frame(frame_cabecalho, bg=BG)
@@ -1076,12 +1076,12 @@ painel_esq = tk.Frame(corpo, bg=BG, width=250)
 painel_esq.pack(side="left", fill="y", padx=(0, 44))
 painel_esq.pack_propagate(False)
 
-tk.Label(painel_esq, text="A P R O V A Ç Ã O",
+tk.Label(painel_esq, text="A P R O V A Ç Ã O   R P A   —   P F",
          font=("Segoe UI", 8, "bold"), bg=BG, fg=ACTION).pack(anchor="w", pady=(10, 8))
-tk.Label(painel_esq, text="Execute aprovações\ncom segurança.",
+tk.Label(painel_esq, text="Pedidos de\nPagamento PF.",
          font=("Segoe UI", 17, "bold"), bg=BG, fg=TEXT, justify="left").pack(anchor="w")
 tk.Label(painel_esq,
-         text="Selecione a planilha com os pedidos e preencha as datas. O robô abrirá o Conveniar e aprovará cada pedido automaticamente.",
+         text="Automação RPA para aprovação de pedidos de pagamento de pessoa física no Conveniar. Selecione a planilha, informe as datas e o robô aprovará cada pedido automaticamente.",
          font=("Segoe UI", 10), bg=BG, fg="#a5afb6",
          wraplength=220, justify="left").pack(anchor="w", pady=(14, 0))
 
@@ -1108,9 +1108,9 @@ rotulo_contagem = tk.Label(frame_titulo, text="0 de 3",
                             relief="solid", bd=1, padx=10, pady=5)
 rotulo_contagem.pack(side="right", anchor="n")
 
-tk.Label(frame_titulo, text="Configurar aprovação",
+tk.Label(frame_titulo, text="Configurar aprovação de pedidos PF",
          font=("Segoe UI", 13, "bold"), bg=CARD_BG, fg=LABEL_FG).pack(anchor="w")
-tk.Label(frame_titulo, text="Preencha as três etapas para continuar",
+tk.Label(frame_titulo, text="Preencha as três etapas para aprovar os pedidos de pagamento",
          font=("Segoe UI", 9), bg=CARD_BG, fg=LABEL_MUT).pack(anchor="w", pady=(3, 10))
 
 tk.Frame(frame_cartao, bg=BORDER, height=1).pack(fill="x")
@@ -1305,7 +1305,7 @@ scroll_pedidos.pack(side="right", fill="y")
 tk.Frame(janela, bg=DIVIDER, height=1).pack(fill="x")
 rodape_janela = tk.Frame(janela, bg=BG)
 rodape_janela.pack(fill="x", padx=48, pady=12)
-tk.Label(rodape_janela, text="Aprovar Pedidos RPA",
+tk.Label(rodape_janela, text="Aprovar Pedidos de Pagamento PF — RPA",
          font=("Segoe UI", 9), bg=BG, fg="#83919c").pack(side="left")
 tk.Label(rodape_janela, text="Ambiente seguro",
          font=("Segoe UI", 9), bg=BG, fg="#83919c").pack(side="right")
