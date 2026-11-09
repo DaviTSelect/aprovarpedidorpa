@@ -1,0 +1,46 @@
+# ===== AMBIENTES VIRTUAIS =====
+venv/
+.venv/
+env/
+
+# ===== PYTHON =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# ===== DADOS REAIS (nunca versionar planilhas com CPF/dados bancários) =====
+dados/*.xlsx
+!dados/planilha_exemplo.xlsx
+
+# ===== SAÍDAS DO ROBÔ =====
+screenshots/
+*.log
+logs/
+
+# ===== CREDENCIAIS =====
+.env
+*.env
+secrets.json
+
+# ===== PERFIS DE BROWSER =====
+perfil_selenium/
+user_data/
+
+# ===== SISTEMA =====
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*.xlsx
+
+# ===== IDE =====
+.vscode/settings.json
+.idea/
+
+# ===== BUILD PYINSTALLER =====
+dist/
+build/
+*.spec
+
+# ===== PASTA KILO (Claude Code) =====
+.kilo/

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aprovar Pedidos RPA — Manual de Uso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    /* tokens — layout: single-column centered, max-width 800px */
+    :root {
+      --bg:          #f4f7fc;
+      --surface:     #ffffff;
+      --fg:          #1a2235;
+      --fg-muted:    #546380;
+      --accent:      #1a56a4;
+      --accent-low:  #e8f0fb;
+      --border:      #dde3f0;
+      --warn-bg:     #fff8ed;
+      --warn-fg:     #7c4a00;
+      --warn-border: #c07000;
+      --ok-bg:       #edf7f2;
+      --ok-fg:       #15673e;
+      --code-bg:     #eef2f8;
+      --code-fg:     #1a2235;
+      --stripe:      #f7f9fd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:          #0e1420;
+        --surface:     #182030;
+        --fg:          #d8e2f4;
+        --fg-muted:    #7c95bf;
+        --accent:      #5190e0;
+        --accent-low:  #1a2d4a;
+        --border:      #25364e;
+        --warn-bg:     #271500;
+        --warn-fg:     #f0943a;
+        --warn-border: #884000;
+        --ok-bg:       #0c2418;
+        --ok-fg:       #3dcc80;
+        --code-bg:     #131c2e;
+        --code-fg:     #c0d4f0;
+        --stripe:      #131d2e;
+        color-scheme: dark;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .site-header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .brand-mark svg { width: 17px; height: 17px; fill: white; }
+    .brand-name { font-size: 14px; font-weight: 600; color: var(--fg); white-space: nowrap; }
+    .header-tag {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+      color: var(--accent); background: var(--accent-low);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 3px 10px; white-space: nowrap;
+    }
+
+    .page-body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    .hero { margin-bottom: 36px; }
+    .eyebrow {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--accent); margin: 0 0 8px;
+    }
+    h1 { font-size: 30px; font-weight: 700; line-height: 1.2; color: var(--fg); margin: 0 0 10px; }
+    .hero-lead { font-size: 16px; color: var(--fg-muted); max-width: 60ch; margin: 0; }
+
+    .toc {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 22px; margin-bottom: 48px;
+    }
+    .toc-heading {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--fg-muted); margin: 0 0 10px;
+    }
+    .toc-grid {
+      list-style: none; margin: 0; padding: 0;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 2px 12px;
+    }
+    .toc-grid a {
+      display: flex; align-items: center; gap: 8px; padding: 5px 2px;
+      text-decoration: none; font-size: 13.5px; color: var(--accent); font-weight: 500;
+    }
+    .toc-grid a:hover { color: var(--fg); text-decoration: underline; }
+    .toc-n { font-size: 11px; color: var(--fg-muted); min-width: 1.6em; }
+
+    section { margin-bottom: 44px; scroll-margin-top: 72px; }
+
+    h2 {
+      font-size: 20px; font-weight: 700; color: var(--fg);
+      margin: 0 0 18px; padding-bottom: 12px;
+      border-bottom: 2px solid var(--accent-low);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sec-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; min-width: 30px;
+      background: var(--accent); color: white; border-radius: 50%;
+      font-size: 13px; font-weight: 700;
+    }
+
+    p { margin: 0 0 14px; max-width: 68ch; }
+    p:last-child { margin-bottom: 0; }
+
+    .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; }
+    .ck-icon {
+      width: 20px; height: 20px; min-width: 20px;
+      background: var(--ok-bg); color: var(--ok-fg);
+      border: 1.5px solid var(--ok-fg); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; margin-top: 2px;
+    }
+
+    .callout { display: flex; gap: 12px; padding: 14px 16px; border-radius: 8px; margin: 16px 0; }
+    .callout-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-fg); }
+    .callout-icon { font-size: 18px; line-height: 1.3; flex-shrink: 0; }
+    .callout-body { font-size: 14px; line-height: 1.55; min-width: 0; color: var(--warn-fg); }
+    .callout-body strong { display: block; font-weight: 600; margin-bottom: 2px; }
+
+    .table-wrap { overflow-x: auto; margin: 16px 0; border-radius: 10px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 400px; }
+    thead th {
+      background: var(--accent); color: white; font-size: 12.5px;
+      font-weight: 600; letter-spacing: 0.03em; padding: 10px 14px;
+      text-align: left; white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 9px 0 0 0; }
+    thead th:last-child  { border-radius: 0 9px 0 0; }
+    tbody tr { border-top: 1px solid var(--border); }
+    tbody tr:nth-child(even) { background: var(--stripe); }
+    td { padding: 10px 14px; vertical-align: top; }
+    td:first-child { font-weight: 500; }
+
+    code {
+      font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      font-size: 13px; background: var(--code-bg); color: var(--code-fg);
+      padding: 2px 6px; border-radius: 4px;
+    }
+    pre {
+      font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      font-size: 13px; background: var(--code-bg); color: var(--code-fg);
+      padding: 16px 20px; border-radius: 8px; overflow-x: auto;
+      margin: 12px 0; border: 1px solid var(--border); line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; border-radius: 0; }
+
+    .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+    .steps li { display: flex; gap: 14px; align-items: flex-start; }
+    .step-num {
+      width: 28px; height: 28px; min-width: 28px;
+      background: var(--accent-low); color: var(--accent);
+      border: 1.5px solid var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px; font-weight: 700; margin-top: 1px;
+    }
+    .step-body { flex: 1; min-width: 0; padding-top: 2px; }
+    .field-list { margin: 8px 0 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+    .field-list li { font-size: 14px; }
+
+    .log-box {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px; margin-top: 14px;
+    }
+    .log-line {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      font-size: 13px; line-height: 1.5;
+    }
+    .log-ok  { color: var(--ok-fg); }
+    .log-err { color: var(--warn-fg); }
+    .log-icon { flex-shrink: 0; }
+    .log-text { flex: 1; min-width: 0; word-break: break-word; }
+
+    .tips { display: flex; flex-direction: column; gap: 12px; }
+    .tip {
+      display: flex; gap: 14px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; align-items: flex-start;
+    }
+    .tip-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+    .tip-body { flex: 1; min-width: 0; font-size: 14.5px; line-height: 1.6; }
+    .tip-body strong { display: block; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+
+    footer {
+      margin-top: 56px; border-top: 1px solid var(--border);
+      padding-top: 20px; text-align: center; font-size: 13px; color: var(--fg-muted);
+    }
+
+    @media (max-width: 600px) {
+      .page-body { padding: 32px 16px 48px; }
+      h1 { font-size: 24px; }
+      .toc-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.92c.04-.34.07-.69.07-1.08s-.03-.74-.07-1.08l2.32-1.82c.21-.16.27-.46.14-.7l-2.2-3.82c-.13-.24-.42-.32-.67-.24l-2.74 1.1c-.57-.44-1.18-.8-1.86-1.08L14.21 1H9.79L9.37 3.86C8.69 4.14 8.08 4.5 7.5 4.94l-2.73-1.1c-.25-.08-.54 0-.67.24L1.9 7.9c-.14.24-.07.54.14.7l2.32 1.82C4.32 10.76 4.29 11.1 4.29 11.5s.03.74.07 1.08L2.04 14.4c-.21.16-.27.46-.14.7l2.2 3.82c.13.24.42.32.67.24l2.74-1.1c.57.44 1.18.8 1.86 1.08L9.79 22h4.42l.42-2.86c.68-.28 1.29-.64 1.86-1.08l2.74 1.1c.25.08.54 0 .67-.24l2.2-3.82c.13-.24.07-.54-.14-.7l-2.33-1.82z"/></svg>
+      </div>
+      <span class="brand-name">Aprovar Pedidos RPA</span>
+    </div>
+    <span class="header-tag">Manual de Uso</span>
+  </div>
+</header>
+
+<main class="page-body">
+
+  <div class="hero">
+    <p class="eyebrow">AUTOMAÇÃO · CONVENIAR</p>
+    <h1>Manual de Uso</h1>
+    <p class="hero-lead">Guia completo para preparar a planilha e executar o robô de aprovação de pedidos. Sem precisar saber programação.</p>
+  </div>
+
+  <nav class="toc" aria-label="Índice da página">
+    <p class="toc-heading">NESTA PÁGINA</p>
+    <ol class="toc-grid">
+      <li><a href="#o-que-faz"><span class="toc-n">1.</span> O que o robô faz</a></li>
+      <li><a href="#prerequisitos"><span class="toc-n">2.</span> Antes de começar</a></li>
+      <li><a href="#planilha"><span class="toc-n">3.</span> Preparando a planilha</a></li>
+      <li><a href="#executar"><span class="toc-n">4.</span> Executando o robô</a></li>
+      <li><a href="#progresso"><span class="toc-n">5.</span> Acompanhando o progresso</a></li>
+      <li><a href="#resultado"><span class="toc-n">6.</span> Resultado na planilha</a></li>
+      <li><a href="#problemas"><span class="toc-n">7.</span> Problemas comuns</a></li>
+      <li><a href="#dicas"><span class="toc-n">8.</span> Dicas</a></li>
+      <li><a href="#suporte"><span class="toc-n">9.</span> Suporte</a></li>
+    </ol>
+  </nav>
+
+  <section id="o-que-faz">
+    <h2><span class="sec-num">1</span> O que o robô faz</h2>
+    <p>O robô abre o sistema Conveniar automaticamente, busca cada pedido da sua planilha e executa todo o processo de aprovação — conta bancária, plano de trabalho, INSS Patronal e aprovação final — salvando o resultado na planilha em tempo real.</p>
+    <p>Até <strong>5 pedidos são processados ao mesmo tempo</strong>, em sessões separadas do Chrome.</p>
+  </section>
+
+  <section id="prerequisitos">
+    <h2><span class="sec-num">2</span> Antes de começar</h2>
+    <ul class="checklist">
+      <li><span class="ck-icon">✓</span><span>Feche a planilha no Excel antes de rodar o robô — ele precisa salvar nela enquanto processa</span></li>
+      <li><span class="ck-icon">✓</span><span>Certifique-se de que o Chrome portátil está em <code>C:\Users\SeuUsuário\Chrome\</code></span></li>
+      <li><span class="ck-icon">✓</span><span>Sua planilha deve estar no formato <code>.xlsx</code></span></li>
+    </ul>
+  </section>
+
+  <section id="planilha">
+    <h2><span class="sec-num">3</span> Preparando a planilha</h2>
+    <p>Abra o arquivo <code>dados\planilha_exemplo.xlsx</code> como modelo e preencha uma linha por pedido.</p>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body"><strong>Atenção</strong>Não altere o nome das colunas. O robô lê pelo nome exato.</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coluna</th><th>O que colocar</th><th>Obrigatória</th><th>Exemplo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nº Pedido</strong></td><td>Número exatamente como aparece no Conveniar</td><td>Sim</td><td><code>54320/2026</code></td></tr>
+          <tr><td><strong>Item PT</strong></td><td>Rubrica do plano de trabalho</td><td>Sim</td><td><code>Fiscal</code></td></tr>
+          <tr><td><strong>Favorecido</strong></td><td>Nome da pessoa (só para controle)</td><td>Não</td><td><code>João da Silva</code></td></tr>
+          <tr><td><strong>Data Nascimento</strong></td><td>Data no formato dd/mm/aaaa (opcional)</td><td>Não</td><td><code>15/03/1990</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="executar">
+    <h2><span class="sec-num">4</span> Executando o robô</h2>
+    <ol class="steps">
+      <li><span class="step-num">1</span><div class="step-body">Abra o terminal (PowerShell) na pasta do projeto</div></li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-body">Execute os comandos:<pre><code>.\venv\Scripts\Activate.ps1
+python aprovar_pedidos.py</code></pre></div>
+      </li>
+      <li><span class="step-num">3</span><div class="step-body">Uma janela abrirá. Clique em <strong>Selecionar Planilha</strong> e escolha seu arquivo <code>.xlsx</code></div></li>
+      <li>
+        <span class="step-num">4</span>
+        <div class="step-body">Preencha os campos:
+          <ul class="field-list">
+            <li><strong>Data de Pagamento</strong> — data em que os pagamentos serão realizados</li>
+            <li><strong>Competência</strong> — mês/ano de referência (ex: <code>11/2026</code>)</li>
+          </ul>
+        </div>
+      </li>
+      <li><span class="step-num">5</span><div class="step-body">Clique em <strong>Iniciar</strong> — o robô processa todos os pedidos automaticamente</div></li>
+    </ol>
+  </section>
+
+  <section id="progresso">
+    <h2><span class="sec-num">5</span> Acompanhando o progresso</h2>
+    <p>O painel mostra cada pedido sendo processado em tempo real. Exemplos de mensagens:</p>
+    <div class="log-box">
+      <div class="log-line log-ok"><span class="log-icon">✅</span><span class="log-text">Pedido 54320/2026 aprovado com sucesso!</span></div>
+      <div class="log-line log-err"><span class="log-icon">❌</span><span class="log-text">Erro ao processar 54321/2026: Conta principal não encontrada</span></div>
+    </div>
+  </section>
+
+  <section id="resultado">
+    <h2><span class="sec-num">6</span> Resultado na planilha</h2>
+    <p>Ao final, sua planilha terá três abas. A coluna <strong>Resultado Aprovação</strong> é preenchida automaticamente para cada pedido.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aba</th><th>O que contém</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Aba 1 (original)</strong></td><td>Pedidos com falha que podem ser tentados novamente</td></tr>
+          <tr><td><strong>Processados</strong></td><td>Pedidos aprovados com sucesso ou não encontrados no sistema</td></tr>
+          <tr><td><strong>Erros</strong></td><td>Pedidos com erro — conta bancária não encontrada, dados inconsistentes, etc.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="problemas">
+    <h2><span class="sec-num">7</span> Problemas comuns</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Problema</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>"Selecione uma planilha .xlsx"</td><td>Converta o arquivo de <code>.xls</code> para <code>.xlsx</code> antes de usar</td></tr>
+          <tr><td>"A planilha precisa ter a coluna Nº Pedido"</td><td>Verifique se o cabeçalho está escrito exatamente assim, incluindo o "º"</td></tr>
+          <tr><td>"file is not a zip"</td><td>Feche a planilha no Excel e tente novamente</td></tr>
+          <tr><td>Pedido vai para aba Erros</td><td>Verifique se a conta bancária principal está cadastrada no Conveniar</td></tr>
+          <tr><td>Nenhum pedido processado</td><td>Certifique-se de que há dados a partir da segunda linha (linha 1 é sempre o cabeçalho)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="dicas">
+    <h2><span class="sec-num">8</span> Dicas</h2>
+    <div class="tips">
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <div class="tip-body"><strong>Data de nascimento</strong>Se já estiver preenchida no Conveniar, o robô não altera. Ele só preenche se o campo estiver vazio no sistema — e se a planilha tiver um valor para aquele pedido.</div>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">🖥️</span>
+        <div class="tip-body"><strong>Janelas do Chrome</strong>O robô abre até 5 abas do Chrome ao mesmo tempo. Não feche as janelas enquanto estiver processando.</div>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">🔍</span>
+        <div class="tip-body"><strong>Screenshots de debug</strong>Se precisar investigar um erro, edite <code>aprovar_pedidos.py</code> e mude <code>SALVAR_SCREENSHOTS = True</code>. As imagens ficam na pasta <code>screenshots/</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="suporte">
+    <h2><span class="sec-num">9</span> Suporte</h2>
+    <p>Em caso de dúvidas ou erros não cobertos por este manual, contate a equipe de automações.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>Aprovar Pedidos RPA · Equipe de Automações · 2026</p>
+</footer>
+
+</body>
+</html>
