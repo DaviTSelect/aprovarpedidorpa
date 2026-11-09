@@ -18,7 +18,7 @@ from pathlib import Path
 
 # ── Configure aqui após criar o repositório no GitHub ──────────────────────
 # Exemplo: REPO_GITHUB = "minhaempresa/aprovar-pedidos-rpa"
-REPO_GITHUB: str = ""
+REPO_GITHUB: str = "DaviTSelect/aprovarpedidorpa"
 
 NOME_EXE: str = "aprovar_pedidos.exe"
 
