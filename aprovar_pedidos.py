@@ -1463,23 +1463,14 @@ def _verificar_atualizacao():
         if auto_update.tem_versao_nova(release, __version__):
             nova = release.get("tag_name", "?")
 
-            def _oferecer():
+            def _iniciar_update():
                 _lbl_update_dot.configure(fg=auto_update.COR_BUSY)
-                _lbl_update_txt.configure(text=f"Nova versão: {nova}")
+                _lbl_update_txt.configure(text=f"Atualizando para {nova}...")
                 if auto_update.pode_instalar():
-                    resposta = messagebox.askyesno(
-                        "Atualização disponível",
-                        f"Versão {nova} disponível.\nDeseja atualizar agora?\n\n"
-                        "O programa será reiniciado automaticamente.",
-                        parent=janela,
-                    )
-                    if resposta:
-                        _lbl_update_dot.configure(fg=auto_update.COR_BUSY)
-                        _lbl_update_txt.configure(text="Baixando...")
-                        threading.Thread(target=_baixar_e_instalar,
-                                         args=(release,), daemon=True).start()
+                    threading.Thread(target=_baixar_e_instalar,
+                                     args=(release,), daemon=True).start()
 
-            janela.after(0, _oferecer)
+            janela.after(0, _iniciar_update)
         else:
             janela.after(0, lambda: (
                 _lbl_update_dot.configure(fg=auto_update.COR_OK),
@@ -1494,14 +1485,18 @@ def _verificar_atualizacao():
 
 def _baixar_e_instalar(release):
     try:
+        janela.after(0, lambda: _lbl_update_txt.configure(text="Baixando atualização..."))
         auto_update.instalar(release, auto_update.NOME_EXE)
         janela.after(0, lambda: (
             _lbl_update_txt.configure(text="Reiniciando..."),
             janela.after(1500, janela.destroy),
         ))
     except Exception as e:
-        janela.after(0, lambda: messagebox.showerror(
-            "Erro na atualização", str(e), parent=janela))
+        janela.after(0, lambda: (
+            _lbl_update_dot.configure(fg=auto_update.COR_UNKNOWN),
+            _lbl_update_txt.configure(text="Falha na atualização"),
+            messagebox.showerror("Erro na atualização", str(e), parent=janela),
+        ))
 
 
 threading.Thread(target=_verificar_atualizacao, daemon=True).start()
