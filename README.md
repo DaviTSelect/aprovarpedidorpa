@@ -88,6 +88,20 @@ Edite as constantes no topo de `aprovar_pedidos.py`:
 | `NUM_NAVEGADORES` | `5` | Número de sessões paralelas do Chrome |
 | `SALVAR_SCREENSHOTS` | `False` | `True` para salvar captura após cada passo (debug) |
 
+## Testes
+
+Execute a suíte automatizada com Python 3.10 ou superior:
+
+```powershell
+python -m unittest discover -v
+```
+
+A suíte cobre testes unitários de consulta à release, comparação de versões,
+detecção do modo executável e instalação; também cobre o fluxo integrado de
+consulta, download e preparação da substituição. Chamadas HTTP e a execução do
+`.bat` são simuladas, então os testes não acessam o GitHub nem substituem ou
+reiniciam o executável real.
+
 ## Padrão Corporativo
 
 Este projeto segue a categoria **AUTO** do [Padrão de Engenharia da Empresa](../PADRAO_EMPRESA/specs/00_PADRAO_GERAL.spec.md).
