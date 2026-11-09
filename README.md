@@ -102,6 +102,33 @@ consulta, download e preparação da substituição. Chamadas HTTP e a execuçã
 `.bat` são simuladas, então os testes não acessam o GitHub nem substituem ou
 reiniciam o executável real.
 
+## Publicar nova versão
+
+> **Fluxo completo:** altere `version.py` → commite → rode `release.bat`
+
+**1. Atualize a versão** em [version.py](version.py):
+
+```python
+__version__ = "1.1.0"
+```
+
+**2. Atualize `CHANGELOG.md`** com as entradas da versão.
+
+**3. Commite e envie:**
+
+```bat
+git add version.py CHANGELOG.md
+git commit -m "release: v1.1.0"
+git push origin main
+```
+
+**4. Execute `release.bat`** (duplo clique):
+
+O script verifica testes, compila `AprovarPedidosPF.exe` via PyInstaller,
+calcula SHA-256, cria a tag, publica a release no GitHub com o `.exe` e o `.sha256` anexados.
+
+Pré-requisito único: `gh auth login` (uma vez por máquina).
+
 ## Padrão Corporativo
 
 Este projeto segue a categoria **AUTO** do [Padrão de Engenharia da Empresa](../PADRAO_EMPRESA/specs/00_PADRAO_GERAL.spec.md).
