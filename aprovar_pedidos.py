@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import pandas as pd
 import zipfile
@@ -127,6 +127,8 @@ def _caminho_env():
     if getattr(sys, "frozen", False):
         return Path(sys.executable).parent
     return Path(__file__).resolve().parent
+
+
 
 
 def realizar_login():
@@ -266,7 +268,7 @@ def consolidar_planilha(caminho_arquivo, registros_status):
         del wb["status_aprov"]
 
     ws_status = wb.create_sheet("status_aprov")
-    cabecalhos = ["Nº Pedido", "Item PT", "Favorecido", "Resultado Aprovação"]
+    cabecalhos = ["Nº Pedido", "Item", "Favorecido", "Resultado Aprovação"]
     for col, titulo in enumerate(cabecalhos, 1):
         ws_status.cell(1, col, titulo)
 
@@ -288,7 +290,7 @@ def consolidar_planilha(caminho_arquivo, registros_status):
 # Função principal de aprovação
 # ---------------------------------------------------------------------------
 
-def funcao_aprovar(navegador, pedido, numero, rubrica, data_pagamento, competencia, data_nascimento=""):
+def funcao_aprovar(navegador, pedido, numero, rubrica, data_pagamento, competencia, data_nascimento="", periodo_rubrica=""):
     """Busca o pedido pelo número e o aprova usando apenas a rubrica da planilha."""
     wait = WebDriverWait(navegador, 20)
 
@@ -666,25 +668,51 @@ def funcao_aprovar(navegador, pedido, numero, rubrica, data_pagamento, competenc
             # Passo 20 – Marcar a linha da rubrica no grid do plano de trabalho
             # Usa JS para localizar o checkbox e evitar StaleElementReferenceException
             # -----------------------------------------------------------------
-            print(f"   [20] Procurando rubrica '{rubrica}' no plano de trabalho...")
-            cb_id_pt = js("""
+            print(f"   [20] Procurando rubrica '{rubrica}' (período: '{periodo_rubrica}') no plano de trabalho...")
+            _pt_result = js("""
                 var grid = document.getElementById(
                     'ctl00_ContentPlaceHolder1_wucConvenioPlanoTrabalhoAprovarUserControl1_gdwPlanoTrabalho'
                 );
                 if (!grid) return null;
-                var rows = grid.querySelectorAll('tr[data-grupo-rubrica]');
+                var allRows = grid.querySelectorAll('tr');
                 var termo = arguments[0].toLowerCase();
-                for (var i = 0; i < rows.length; i++) {
-                    var tds = rows[i].querySelectorAll('td');
+                var periodo = arguments[1];
+                var inPeriodo = !periodo;
+                var periodoEncontrado = !periodo;
+                for (var i = 0; i < allRows.length; i++) {
+                    var row = allRows[i];
+                    var tds = row.querySelectorAll('td');
+                    if (tds.length === 1 && parseInt(tds[0].getAttribute('colspan') || '0') >= 10) {
+                        var txt = tds[0].textContent.trim();
+                        if (!periodo || txt === periodo) {
+                            inPeriodo = true;
+                            periodoEncontrado = true;
+                        } else {
+                            inPeriodo = false;
+                        }
+                        row.scrollIntoView({block:'nearest'});
+                        continue;
+                    }
+                    if (!inPeriodo) continue;
+                    if (!row.getAttribute('data-grupo-rubrica')) continue;
                     if (tds.length >= 4 && tds[3].textContent.trim().toLowerCase().indexOf(termo) !== -1) {
-                        var cb = rows[i].querySelector('input[type=checkbox]');
-                        if (cb) return cb.id;
+                        var cb = row.querySelector('input[type=checkbox]');
+                        if (cb) {
+                            cb.scrollIntoView({block:'center',behavior:'smooth'});
+                            return {id: cb.id};
+                        }
                     }
                 }
-                return null;
-            """, rubrica)
-            if not cb_id_pt:
-                raise RuntimeError(f"Rubrica '{rubrica}' não encontrada no plano de trabalho")
+                if (!periodoEncontrado) return {no_period: true};
+                return {not_found: true};
+            """, rubrica, periodo_rubrica)
+            if not _pt_result:
+                raise RuntimeError("Grid do plano de trabalho não encontrado")
+            if _pt_result.get("no_period"):
+                raise RuntimeError(f"Período '{periodo_rubrica}' não encontrado no plano de trabalho")
+            if not _pt_result.get("id"):
+                raise RuntimeError(f"Item '{rubrica}' não encontrado no período '{periodo_rubrica}'")
+            cb_id_pt = _pt_result["id"]
             cb_pt = eid(cb_id_pt)
             rolar(cb_pt)
             print(f"      ✓ Encontrada (id={cb_id_pt})")
@@ -737,26 +765,52 @@ def funcao_aprovar(navegador, pedido, numero, rubrica, data_pagamento, competenc
             # Passo 26 – Marcar linha INSS Patronal no plano
             # (linha especial com lbtDefinir em vez de checkbox)
             # -----------------------------------------------------------------
-            print("   [26] Marcando INSS Patronal no plano de trabalho...")
-            # JS localiza checkbox ou link lbtDefinir da linha INSS Patronal
+            print(f"   [26] Marcando INSS Patronal no plano de trabalho (período: '{periodo_rubrica}')...")
             inss_info = js("""
                 var grid = document.getElementById(
                     'ctl00_ContentPlaceHolder1_wucConvenioPlanoTrabalhoAprovarUserControl1_gdwPlanoTrabalho'
                 );
                 if (!grid) return null;
-                var rows = grid.querySelectorAll('tr');
-                for (var i = 0; i < rows.length; i++) {
-                    if (rows[i].textContent.indexOf('INSS Patronal') !== -1) {
-                        var cb = rows[i].querySelector('input[type=checkbox]');
-                        if (cb) return {tipo: 'checkbox', id: cb.id};
-                        var lnk = rows[i].querySelector('a[title="Definir pagamento"]');
-                        if (lnk) return {tipo: 'link', id: lnk.id};
+                var allRows = grid.querySelectorAll('tr');
+                var periodo = arguments[0];
+                var inPeriodo = !periodo;
+                var periodoEncontrado = !periodo;
+                for (var i = 0; i < allRows.length; i++) {
+                    var row = allRows[i];
+                    var tds = row.querySelectorAll('td');
+                    if (tds.length === 1 && parseInt(tds[0].getAttribute('colspan') || '0') >= 10) {
+                        var txt = tds[0].textContent.trim();
+                        if (!periodo || txt === periodo) {
+                            inPeriodo = true;
+                            periodoEncontrado = true;
+                        } else {
+                            inPeriodo = false;
+                        }
+                        continue;
+                    }
+                    if (!inPeriodo) continue;
+                    if (row.textContent.indexOf('INSS Patronal') !== -1) {
+                        var cb = row.querySelector('input[type=checkbox]');
+                        if (cb) {
+                            cb.scrollIntoView({block:'center',behavior:'smooth'});
+                            return {tipo: 'checkbox', id: cb.id};
+                        }
+                        var lnk = row.querySelector('a[title="Definir pagamento"]');
+                        if (lnk) {
+                            lnk.scrollIntoView({block:'center',behavior:'smooth'});
+                            return {tipo: 'link', id: lnk.id};
+                        }
                     }
                 }
-                return null;
-            """)
+                if (!periodoEncontrado) return {no_period: true};
+                return {not_found: true};
+            """, periodo_rubrica)
             if not inss_info:
-                raise RuntimeError("Linha INSS Patronal não encontrada no plano de trabalho")
+                raise RuntimeError("Grid do plano de trabalho não encontrado (INSS Patronal)")
+            if inss_info.get("no_period"):
+                raise RuntimeError(f"Período '{periodo_rubrica}' não encontrado no plano de trabalho (INSS Patronal)")
+            if not inss_info.get("id"):
+                raise RuntimeError(f"Linha INSS Patronal não encontrada no período '{periodo_rubrica}'")
             elem_inss = eid(inss_info["id"])
             rolar(elem_inss)
             if inss_info["tipo"] == "checkbox":
@@ -879,19 +933,42 @@ def executar_parte(parte, caminho_arquivo, indice_trabalhador, data_pagamento, c
             if navegador is None:
                 raise RuntimeError("Login não retornou um navegador Selenium.")
 
+            _COLS_OBRIG = ["Nº Pedido", "Item", "Favorecido", "Rubrica"]
             for linha_indice, linha in parte.iterrows():
                 pedido = str(linha["Nº Pedido"]).strip()
-                rubrica = str(linha.get("Item PT", "")).strip()
+                rubrica = str(linha.get("Item", "")).strip()
+                periodo_rubrica = str(linha.get("Rubrica", "")).strip()
+                if periodo_rubrica in ("nan", "None", "NaT"):
+                    periodo_rubrica = ""
                 favorecido = str(linha.get("Favorecido", "")).strip()
                 data_nascimento = str(linha.get("Data Nascimento", "")).strip()
                 if data_nascimento in ("nan", "None", "NaT"):
                     data_nascimento = ""
                 posicao = int(linha_indice)
                 eventos_painel.put(("pedido", posicao, pedido, indice_trabalhador))
+
+                # Valida campos obrigatórios antes de abrir o navegador
+                _vazios = []
+                for _col in _COLS_OBRIG:
+                    _val = str(linha.get(_col, "")).strip()
+                    if not _val or _val.lower() in ("nan", "none", "nat"):
+                        _vazios.append(_col)
+                if _vazios:
+                    resultado = f"Falha: campo(s) obrigatório(s) vazio(s): {', '.join(_vazios)}"
+                    resultados.append((posicao, pedido, resultado))
+                    registros_status.append((pedido, rubrica, favorecido, resultado))
+                    eventos_painel.put(("concluido", posicao, pedido, resultado, indice_trabalhador))
+                    try:
+                        registrar_e_mover_se_concluido(caminho_arquivo, pedido, resultado)
+                    except Exception:
+                        pass
+                    continue
+
                 try:
                     resultado = funcao_aprovar(
                         navegador, pedido, posicao, rubrica, data_pagamento, competencia,
                         data_nascimento=data_nascimento,
+                        periodo_rubrica=periodo_rubrica,
                     )
                     resultado = resultado or "Resultado incerto"
                 except Exception as exc:
@@ -914,7 +991,7 @@ def executar_parte(parte, caminho_arquivo, indice_trabalhador, data_pagamento, c
             if not any(r[0] == posicao for r in resultados):
                 res = f"Falha na sessão do navegador {indice_trabalhador}: {exc}"
                 pedido = str(linha["Nº Pedido"]).strip()
-                rubrica = str(linha.get("Item PT", "")).strip()
+                rubrica = str(linha.get("Item", "")).strip()
                 favorecido = str(linha.get("Favorecido", "")).strip()
                 resultados.append((int(posicao), pedido, res))
                 registros_status.append((pedido, rubrica, favorecido, res))
@@ -943,7 +1020,17 @@ def processar_planilha(caminho_arquivo, data_pagamento, competencia):
         if Path(caminho_arquivo).suffix.lower() != ".xlsx":
             raise ValueError("Selecione uma planilha .xlsx (converta .xls antes de iniciar).")
 
-        df = pd.read_excel(caminho_arquivo, dtype={"Nº Pedido": str})
+        # Detecta qual linha contém o cabeçalho real (aquela com "Nº Pedido")
+        _pre = pd.read_excel(caminho_arquivo, header=None, nrows=10, dtype=str)
+        _header_row = None
+        for _i, _row in _pre.iterrows():
+            if any(str(v).strip() == "Nº Pedido" for v in _row):
+                _header_row = _i
+                break
+        if _header_row is None:
+            raise ValueError("Coluna 'Nº Pedido' não encontrada nas primeiras linhas da planilha.")
+
+        df = pd.read_excel(caminho_arquivo, header=_header_row, dtype={"Nº Pedido": str})
         df.columns = [str(c).strip() for c in df.columns]
         # Normaliza variações de nome da coluna data de nascimento
         _NASC_ALIASES = {"data_nascimento", "datanascim", "data nascimento", "dt_nascimento", "nascimento"}
@@ -952,10 +1039,10 @@ def processar_planilha(caminho_arquivo, data_pagamento, competencia):
             for c in df.columns
         ]
 
-        if "Nº Pedido" not in df.columns:
-            raise ValueError("A planilha precisa ter a coluna 'Nº Pedido'.")
-        if "Item PT" not in df.columns:
-            raise ValueError("A planilha precisa ter a coluna 'Item PT'.")
+        _COLUNAS_OBRIGATORIAS = ["Nº Pedido", "Item", "Favorecido", "Rubrica"]
+        _faltando = [c for c in _COLUNAS_OBRIGATORIAS if c not in df.columns]
+        if _faltando:
+            raise ValueError(f"Coluna(s) obrigatória(s) ausente(s) na planilha: {', '.join(_faltando)}")
 
         df = df[df["Nº Pedido"].notna()].copy()
         df["Nº Pedido"] = df["Nº Pedido"].astype(str).str.strip()
@@ -971,6 +1058,7 @@ def processar_planilha(caminho_arquivo, data_pagamento, competencia):
             return
 
         df = df.reset_index(drop=True)
+
         n = min(NUM_NAVEGADORES, len(df))
         partes = [df.iloc[i::n].copy() for i in range(n) if len(df.iloc[i::n]) > 0]
         eventos_painel.put(("total", total))
