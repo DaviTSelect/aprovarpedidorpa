@@ -41,6 +41,7 @@ desktop.ini
 dist/
 build/
 *.spec
+!AprovarPedidosPF.spec
 
 # ===== PASTA KILO (Claude Code) =====
 .kilo/
